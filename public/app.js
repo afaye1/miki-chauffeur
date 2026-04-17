@@ -220,13 +220,14 @@
     setTimeout(() => $("startAddress").focus(), 60);
   }
 
-  // ---------- Cleanup: wipe any leftover gate state ----------
+  // ---------- Cleanup: wipe any leftover state + nuke any service worker ----------
   try { localStorage.removeItem("unclemiki.familyCode"); } catch {}
-
-  // ---------- Service worker (self-unregister if stale, then re-register) ----------
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
-    });
+    navigator.serviceWorker.getRegistrations?.().then((regs) => {
+      regs.forEach((r) => r.unregister().catch(() => {}));
+    }).catch(() => {});
+    if (window.caches) {
+      caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
+    }
   }
 })();

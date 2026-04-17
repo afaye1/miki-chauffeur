@@ -198,8 +198,15 @@ app.post("/api/book", rateLimit, familyGate, async (req, res) => {
   }
 });
 
-// ---------- Static ----------
-app.use(express.static(path.join(__dirname, "public"), { etag: true, maxAge: "1h" }));
+// ---------- Static: no-cache on HTML + SW so clients always see latest ----------
+app.use((req, res, next) => {
+  const p = req.path;
+  if (p === "/" || p.endsWith(".html") || p === "/sw.js" || p === "/manifest.webmanifest") {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+  }
+  next();
+});
+app.use(express.static(path.join(__dirname, "public"), { etag: true, maxAge: "5m" }));
 
 app.listen(PORT, () => {
   console.log(`[miki] listening on :${PORT} for ${DELEGATED_USER}  gate=${Boolean(FAMILY_CODE)}`);
