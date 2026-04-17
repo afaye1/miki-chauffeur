@@ -1,4 +1,4 @@
-const CACHE = "miki-shell-v3";
+const CACHE = "miki-shell-v4";
 const SHELL = [
   "/",
   "/styles.css",
@@ -25,11 +25,10 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Never cache API calls
+  // Never cache API or healthz
   if (url.pathname.startsWith("/api/") || url.pathname === "/healthz") return;
   if (req.method !== "GET") return;
 
-  // Cache-first for same-origin shell, network fallback otherwise
   if (url.origin === location.origin) {
     event.respondWith(
       caches.match(req).then((hit) =>

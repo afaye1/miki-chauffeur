@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Uncle Miki">
-<meta name="description" content="Uncle Miki on call — tell him when & where, he'll swing by.">
+<meta name="description" content="Uncle Miki on call — tell him when and where, he'll swing by.">
 <title>Uncle Miki — on call</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
@@ -19,7 +19,35 @@
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <main class="shell" id="shell">
+
+  <!-- Family-code gate (shown only if required) -->
+  <section id="gate" class="gate" hidden>
+    <div class="gate-card">
+      <p class="eyebrow">Uncle duty</p>
+      <h1 class="title">Uncle <em>Miki</em></h1>
+      <p class="tagline">Family only. Drop the code.</p>
+      <form id="gateForm" class="gate-form" novalidate>
+        <label for="gateCode" class="sr-only">Family code</label>
+        <input
+          id="gateCode"
+          name="gateCode"
+          type="text"
+          inputmode="text"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="family code"
+          required>
+        <button type="submit" class="cta cta-compact" id="gateSubmit">
+          <span class="cta-label">Enter</span>
+          <span class="cta-arrow" aria-hidden="true">→</span>
+        </button>
+        <p class="fine" id="gateError" role="alert" hidden></p>
+      </form>
+    </div>
+  </section>
+
+  <main class="shell" id="shell" hidden>
 
     <header class="hero">
       <div class="mark" aria-hidden="true">
@@ -54,23 +82,30 @@
           type="datetime-local"
           required
           autocomplete="off">
-        <p class="hint" id="whenHint">Pick a day &amp; time.</p>
+        <p class="hint" id="whenHint">Pick a day and time.</p>
       </div>
 
-      <div class="field">
+      <div class="field field-ac">
         <label for="startAddress">Where do I grab you?</label>
         <input
           id="startAddress"
           name="startAddress"
           type="text"
           inputmode="text"
-          autocomplete="street-address"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-controls="startAddress-suggestions"
           required
           placeholder="Home, school, wherever"
           maxlength="240">
+        <ul id="startAddress-suggestions" class="ac-list" role="listbox" hidden></ul>
       </div>
 
-      <div class="field">
+      <div class="field field-ac">
         <label for="endAddress">Where we headed?</label>
         <input
           id="endAddress"
@@ -78,19 +113,26 @@
           type="text"
           inputmode="text"
           autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-controls="endAddress-suggestions"
           required
           placeholder="Practice, airport, the mall…"
           maxlength="240">
+        <ul id="endAddress-suggestions" class="ac-list" role="listbox" hidden></ul>
       </div>
 
       <div class="field">
-        <label for="notes">Anything Uncle should know? <span class="meta">(optional)</span></label>
+        <label for="notes">Anything I should know? <span class="meta">(optional)</span></label>
         <textarea
           id="notes"
           name="notes"
           rows="3"
           maxlength="600"
-          placeholder="Bags, stops, snacks you want on the way…"></textarea>
+          placeholder="Bags, stops, music on the way…"></textarea>
       </div>
 
       <button type="submit" class="cta" id="submitBtn">
