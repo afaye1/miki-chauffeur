@@ -71,7 +71,7 @@
 
   gateForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const code = gateCode.value.trim();
+    const code = gateCode.value.trim().toLowerCase().replace(/\s+/g, "");
     if (!code) return;
     gateSubmit.disabled = true;
     gateError.hidden = true;
