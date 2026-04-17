@@ -1,7 +1,7 @@
-# Miki Chauffeuring
+# Uncle Miki
 
-A tiny, single-page PWA for booking personal chauffeur rides that lands the event
-directly on `alioune@afdvmarketing.com`'s Google Calendar.
+A tiny, single-page PWA for family — tell Uncle Miki when & where, the ride lands
+on `alioune@afdvmarketing.com`'s Google Calendar automatically.
 
 ## Fields captured
 - Passenger name (optional)

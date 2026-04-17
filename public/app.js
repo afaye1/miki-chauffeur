@@ -6,7 +6,6 @@
   const whenHint = document.getElementById("whenHint");
   const successEl = document.getElementById("success");
   const successSub = document.getElementById("successSub");
-  const successLink = document.getElementById("successLink");
   const againBtn = document.getElementById("againBtn");
 
   // Default whenLocal to "now + 30 min" (rounded to :00/:15/:30/:45)
@@ -25,13 +24,14 @@
 
   // Live hint: humanized when-string
   function refreshWhenHint() {
+    const fallback = "Pick a day & time.";
     if (!whenInput.value) {
-      whenHint.textContent = "Pick any date & time.";
+      whenHint.textContent = fallback;
       return;
     }
     const d = new Date(whenInput.value);
     if (Number.isNaN(d.getTime())) {
-      whenHint.textContent = "Pick any date & time.";
+      whenHint.textContent = fallback;
       return;
     }
     const fmt = new Intl.DateTimeFormat(undefined, {
@@ -41,7 +41,7 @@
       hour: "numeric",
       minute: "2-digit",
     });
-    whenHint.textContent = fmt.format(d);
+    whenHint.textContent = `I'll come by ${fmt.format(d)}.`;
   }
   whenInput.addEventListener("input", refreshWhenHint);
   whenInput.addEventListener("blur", refreshWhenHint);
@@ -79,19 +79,19 @@
     const passengerName = document.getElementById("passengerName").value.trim();
 
     if (!whenLocal || !startAddress || !endAddress) {
-      showError("When, pickup and drop-off are required.");
+      showError("I need a time, a pickup and a drop-off, kiddo.");
       return;
     }
 
     const whenDate = new Date(whenLocal);
     if (Number.isNaN(whenDate.getTime())) {
-      showError("That date / time doesn't look right.");
+      showError("That date/time's not right — try again.");
       return;
     }
 
     submitBtn.disabled = true;
     const originalLabel = submitBtn.querySelector(".cta-label").textContent;
-    submitBtn.querySelector(".cta-label").textContent = "Booking…";
+    submitBtn.querySelector(".cta-label").textContent = "Sending…";
 
     try {
       const res = await fetch("/api/book", {
@@ -108,7 +108,7 @@
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        showError(data.error || "Couldn't save the booking. Try again in a second.");
+        showError(data.error || "Couldn't get that to Uncle. Try again in a second.");
         return;
       }
 
@@ -122,12 +122,10 @@
         hour: "numeric",
         minute: "2-digit",
       });
-      successSub.textContent = `${fmt.format(whenDate)} · ${startAddress} → ${endAddress}`;
-      if (data.htmlLink) successLink.href = data.htmlLink;
-      else successLink.hidden = true;
+      successSub.textContent = `I'll be there ${fmt.format(whenDate)} — ${startAddress} → ${endAddress}.`;
     } catch (err) {
       console.error(err);
-      showError("Network hiccup. Check connection and retry.");
+      showError("Signal hiccup. Check your connection and send it again.");
     } finally {
       submitBtn.disabled = false;
       submitBtn.querySelector(".cta-label").textContent = originalLabel;

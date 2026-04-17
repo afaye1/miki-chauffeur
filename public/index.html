@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#f6f0e4">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Miki">
-<meta name="description" content="Miki Chauffeuring — discreet, on-demand rides. Book in seconds.">
-<title>Miki Chauffeuring</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Uncle Miki">
+<meta name="description" content="Uncle Miki on call — tell him when & where, he'll swing by.">
+<title>Uncle Miki — on call</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -27,37 +27,38 @@
         <span class="mark-dot"></span>
         <span class="mark-line"></span>
       </div>
-      <h1 class="title">Miki<span class="title-amp">&middot;</span>Chauffeuring</h1>
-      <p class="tagline">Discreet rides. One tap. Your schedule.</p>
+      <p class="eyebrow">Uncle duty</p>
+      <h1 class="title">Uncle <em>Miki</em></h1>
+      <p class="tagline">Tell me when &amp; where, kiddo. I got you.</p>
     </header>
 
     <form id="booking" class="form" novalidate>
 
       <div class="field">
-        <label for="passengerName">Who's riding</label>
+        <label for="passengerName">Who needs a ride?</label>
         <input
           id="passengerName"
           name="passengerName"
           type="text"
           autocomplete="name"
-          placeholder="e.g. Alioune"
+          placeholder="e.g. Nadia"
           maxlength="80">
-        <p class="hint">Optional — shows up on the calendar event.</p>
+        <p class="hint">So I know who I'm picking up.</p>
       </div>
 
       <div class="field">
-        <label for="whenLocal">When to book</label>
+        <label for="whenLocal">When should I swing by?</label>
         <input
           id="whenLocal"
           name="whenLocal"
           type="datetime-local"
           required
           autocomplete="off">
-        <p class="hint" id="whenHint">Pick any date & time.</p>
+        <p class="hint" id="whenHint">Pick a day &amp; time.</p>
       </div>
 
       <div class="field">
-        <label for="startAddress">Pickup address</label>
+        <label for="startAddress">Where do I grab you?</label>
         <input
           id="startAddress"
           name="startAddress"
@@ -65,12 +66,12 @@
           inputmode="text"
           autocomplete="street-address"
           required
-          placeholder="123 Yonge St, Toronto"
+          placeholder="Home, school, wherever"
           maxlength="240">
       </div>
 
       <div class="field">
-        <label for="endAddress">Drop-off address</label>
+        <label for="endAddress">Where we headed?</label>
         <input
           id="endAddress"
           name="endAddress"
@@ -78,22 +79,22 @@
           inputmode="text"
           autocomplete="off"
           required
-          placeholder="Pearson T1"
+          placeholder="Practice, airport, the mall…"
           maxlength="240">
       </div>
 
       <div class="field">
-        <label for="notes">Notes <span class="meta">(optional)</span></label>
+        <label for="notes">Anything Uncle should know? <span class="meta">(optional)</span></label>
         <textarea
           id="notes"
           name="notes"
           rows="3"
           maxlength="600"
-          placeholder="Bags, stops, music, anything Miki should know"></textarea>
+          placeholder="Bags, stops, snacks you want on the way…"></textarea>
       </div>
 
       <button type="submit" class="cta" id="submitBtn">
-        <span class="cta-label">Book Miki</span>
+        <span class="cta-label">Send it to Uncle Miki</span>
         <span class="cta-arrow" aria-hidden="true">→</span>
       </button>
 
@@ -108,18 +109,15 @@
             stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
-      <h2 class="success-title">Ride locked in</h2>
+      <h2 class="success-title">Got you, kiddo.</h2>
       <p class="success-sub" id="successSub"></p>
-      <a class="success-link" id="successLink" target="_blank" rel="noopener">
-        Open in Google Calendar →
-      </a>
-      <button type="button" class="ghost" id="againBtn">Book another ride</button>
+      <button type="button" class="ghost" id="againBtn">Need another lift?</button>
     </section>
 
     <footer class="foot">
-      <span>Miki Chauffeuring</span>
+      <span>Uncle Miki</span>
       <span class="sep">·</span>
-      <span>By appointment only</span>
+      <span>Family first</span>
     </footer>
 
   </main>

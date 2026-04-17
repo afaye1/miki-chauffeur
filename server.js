@@ -57,16 +57,15 @@ app.post("/api/book", async (req, res) => {
   const end = new Date(start.getTime() + DEFAULT_RIDE_MINUTES * 60_000);
 
   const safeName = (passengerName || "").toString().trim().slice(0, 80);
-  const title = safeName ? `Chauffeur — ${safeName}` : "Chauffeur ride";
+  const summary = safeName ? `Uncle duty — ${safeName}` : "Uncle duty — ride";
 
-  const summary = title;
   const description = [
-    `Passenger: ${safeName || "—"}`,
-    `Pickup: ${startAddress}`,
-    `Dropoff: ${endAddress}`,
-    notes ? `Notes: ${notes}` : null,
+    `Riding: ${safeName || "—"}`,
+    `Grab at: ${startAddress}`,
+    `Drop at: ${endAddress}`,
+    notes ? `Note: ${notes}` : null,
     "",
-    "— Booked via Miki Chauffeuring PWA",
+    "— Sent via Uncle Miki (miki.lemikinos.me)",
   ]
     .filter(Boolean)
     .join("\n");
