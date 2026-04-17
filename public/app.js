@@ -69,6 +69,14 @@
     initFormLogic();
   }
 
+  gateCode.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (typeof gateForm.requestSubmit === "function") gateForm.requestSubmit();
+      else gateForm.dispatchEvent(new Event("submit", { cancelable: true }));
+    }
+  });
+
   gateForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const code = gateCode.value.trim().toLowerCase().replace(/\s+/g, "");

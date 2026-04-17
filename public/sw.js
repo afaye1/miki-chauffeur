@@ -1,4 +1,4 @@
-const CACHE = "miki-shell-v5";
+const CACHE = "miki-shell-v6";
 const SHELL = [
   "/",
   "/styles.css",
