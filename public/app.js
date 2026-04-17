@@ -79,7 +79,7 @@
     const passengerName = document.getElementById("passengerName").value.trim();
 
     if (!whenLocal || !startAddress || !endAddress) {
-      showError("I need a time, a pickup and a drop-off, kiddo.");
+      showError("I need a time, a pickup, and a drop-off.");
       return;
     }
 
@@ -152,6 +152,53 @@
       refreshWhenHint();
     })();
   });
+
+  // Google Maps Places Autocomplete on both address fields.
+  async function wireUpPlaces() {
+    try {
+      const cfgRes = await fetch("/api/config");
+      const cfg = await cfgRes.json();
+      if (!cfg.mapsKey) return;
+
+      window.__initMiki = () => {
+        if (!window.google?.maps?.places) return;
+        const options = {
+          fields: ["formatted_address", "name", "geometry"],
+          types: ["geocode", "establishment"],
+        };
+        if (cfg.country) options.componentRestrictions = { country: cfg.country };
+
+        ["startAddress", "endAddress"].forEach((id) => {
+          const input = document.getElementById(id);
+          if (!input) return;
+          const ac = new google.maps.places.Autocomplete(input, options);
+          ac.addListener("place_changed", () => {
+            const p = ac.getPlace();
+            const val = p?.formatted_address || p?.name;
+            if (val) {
+              input.value = val;
+              input.removeAttribute("aria-invalid");
+            }
+          });
+          // Prevent <form> submit on enter-to-pick-suggestion
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && document.querySelector(".pac-container:not([style*='display: none'])")) {
+              e.preventDefault();
+            }
+          });
+        });
+      };
+
+      const s = document.createElement("script");
+      s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(cfg.mapsKey)}&libraries=places&v=weekly&loading=async&callback=__initMiki`;
+      s.async = true;
+      s.defer = true;
+      document.head.appendChild(s);
+    } catch (err) {
+      console.warn("Places autocomplete unavailable:", err);
+    }
+  }
+  wireUpPlaces();
 
   // Register service worker (progressive enhancement)
   if ("serviceWorker" in navigator) {

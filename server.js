@@ -40,6 +40,13 @@ app.use(express.json({ limit: "32kb" }));
 
 app.get("/healthz", (_req, res) => res.json({ ok: true, user: DELEGATED_USER }));
 
+app.get("/api/config", (_req, res) => {
+  res.json({
+    mapsKey: process.env.GOOGLE_MAPS_API_KEY || "",
+    country: process.env.MAPS_COUNTRY || "ca",
+  });
+});
+
 app.post("/api/book", async (req, res) => {
   const { whenISO, startAddress, endAddress, notes, passengerName } = req.body || {};
 
