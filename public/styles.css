@@ -200,33 +200,6 @@ input[type="datetime-local"] { color-scheme: light; }
 }
 .ghost:hover { border-color: var(--accent); color: var(--accent-deep); }
 
-/* ---------- Gate ---------- */
-.gate {
-  min-height: 100svh; display: flex; align-items: center; justify-content: center;
-  padding: 24px 4px;
-}
-.gate-card {
-  width: 100%; max-width: 380px; text-align: center;
-  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-hi) 100%);
-  border: 1px solid var(--line); border-radius: var(--radius-lg);
-  padding: 36px 26px 30px; box-shadow: var(--shadow);
-}
-.gate-card .eyebrow { margin-bottom: 4px; }
-.gate-card .title { margin-bottom: 8px; font-size: clamp(40px, 10vw, 56px); }
-.gate-card .tagline { margin-bottom: 22px; }
-.gate-form { display: flex; flex-direction: column; gap: 12px; }
-.gate-form input {
-  appearance: none; width: 100%; font: inherit; font-size: 16px;
-  color: var(--text); background: #fffdf7;
-  border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 14px; min-height: 48px; text-align: center;
-  letter-spacing: 0.05em;
-}
-.gate-form input:focus {
-  outline: none; border-color: var(--accent);
-  background: #fff8ea; box-shadow: 0 0 0 3px var(--accent-soft);
-}
-
 /* ---------- Footer ---------- */
 .foot {
   text-align: center; color: var(--muted);

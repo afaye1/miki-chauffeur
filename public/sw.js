@@ -1,10 +1,10 @@
-const CACHE = "miki-shell-v6";
+const CACHE = "miki-shell-v7";
 const SHELL = [
   "/",
   "/styles.css",
   "/app.js",
   "/manifest.webmanifest",
-  "/icon.svg",
+  "/icon-192.png",
 ];
 
 self.addEventListener("install", (event) => {
@@ -24,15 +24,21 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
-
-  // Never cache API or healthz
   if (url.pathname.startsWith("/api/") || url.pathname === "/healthz") return;
   if (req.method !== "GET") return;
 
   if (url.origin === location.origin) {
-    event.respondWith(
-      caches.match(req).then((hit) =>
-        hit ||
+    // Network-first for shell docs so copy/style updates land immediately.
+    const isHtmlOrScript =
+      req.destination === "document" ||
+      req.destination === "script" ||
+      req.destination === "style" ||
+      url.pathname.endsWith(".html") ||
+      url.pathname.endsWith(".js") ||
+      url.pathname.endsWith(".css") ||
+      url.pathname === "/";
+    if (isHtmlOrScript) {
+      event.respondWith(
         fetch(req)
           .then((res) => {
             if (res.ok) {
@@ -41,7 +47,21 @@ self.addEventListener("fetch", (event) => {
             }
             return res;
           })
-          .catch(() => caches.match("/"))
+          .catch(() => caches.match(req).then((hit) => hit || caches.match("/")))
+      );
+      return;
+    }
+    // Cache-first for images/fonts
+    event.respondWith(
+      caches.match(req).then((hit) =>
+        hit ||
+        fetch(req).then((res) => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          }
+          return res;
+        }).catch(() => caches.match("/"))
       )
     );
   }

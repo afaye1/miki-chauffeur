@@ -1,14 +1,6 @@
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  // ---------- Elements ----------
-  const gate = $("gate");
-  const gateForm = $("gateForm");
-  const gateCode = $("gateCode");
-  const gateSubmit = $("gateSubmit");
-  const gateError = $("gateError");
-  const shell = $("shell");
-
   const form = $("booking");
   const submitBtn = $("submitBtn");
   const errorEl = $("formError");
@@ -18,121 +10,39 @@
   const successSub = $("successSub");
   const againBtn = $("againBtn");
 
-  // ---------- State ----------
-  const LS_KEY = "unclemiki.familyCode";
-  let familyCode = localStorage.getItem(LS_KEY) || "";
   let placesSession = "";
 
-  // ---------- Gate logic ----------
-  async function bootstrap() {
-    let gated = false;
-    try {
-      const r = await fetch("/api/has-gate");
-      const j = await r.json();
-      gated = Boolean(j.gated);
-    } catch { /* assume open */ }
+  // ---------- Init ----------
+  (function seedWhen() {
+    const d = new Date(Date.now() + 30 * 60000);
+    d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15, 0, 0);
+    whenInput.value = toLocalInput(d);
+    whenInput.min = toLocalInput(new Date());
+    refreshWhenHint();
+  })();
 
-    if (!gated) {
-      showShell();
-      return;
-    }
+  whenInput.addEventListener("input", refreshWhenHint);
+  whenInput.addEventListener("blur", refreshWhenHint);
 
-    if (familyCode) {
-      // Validate cached code silently
-      const ok = await validateCode(familyCode);
-      if (ok) { showShell(); return; }
-      familyCode = "";
-      localStorage.removeItem(LS_KEY);
-    }
-    showGate();
-  }
-
-  async function validateCode(code) {
-    try {
-      const r = await fetch("/api/check-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
-      });
-      return r.ok;
-    } catch { return false; }
-  }
-
-  function showGate() {
-    gate.hidden = false;
-    shell.hidden = true;
-    setTimeout(() => gateCode.focus(), 60);
-  }
-  function showShell() {
-    gate.hidden = true;
-    shell.hidden = false;
-    initFormLogic();
-  }
-
-  gateCode.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (typeof gateForm.requestSubmit === "function") gateForm.requestSubmit();
-      else gateForm.dispatchEvent(new Event("submit", { cancelable: true }));
-    }
-  });
-
-  gateForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const code = gateCode.value.trim().toLowerCase().replace(/\s+/g, "");
-    if (!code) return;
-    gateSubmit.disabled = true;
-    gateError.hidden = true;
-    const ok = await validateCode(code);
-    gateSubmit.disabled = false;
-    if (ok) {
-      familyCode = code;
-      localStorage.setItem(LS_KEY, code);
-      showShell();
-    } else {
-      gateError.textContent = "That's not the code. Ask Uncle.";
-      gateError.hidden = false;
-      gateCode.select();
-    }
-  });
-
-  // ---------- Form logic (runs after gate passes) ----------
-  function initFormLogic() {
-    // Default when = now + 30 min, rounded to :00/:15/:30/:45
-    (function seedWhen() {
-      const d = new Date(Date.now() + 30 * 60000);
-      d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15, 0, 0);
-      whenInput.value = toLocalInput(d);
-      // min = now, so can't pick past
-      const nowD = new Date();
-      whenInput.min = toLocalInput(nowD);
-      refreshWhenHint();
-    })();
-
-    whenInput.addEventListener("input", refreshWhenHint);
-    whenInput.addEventListener("blur", refreshWhenHint);
-
-    // Blur validation on required fields
-    ["whenLocal", "startAddress", "endAddress"].forEach((id) => {
-      const el = $(id);
-      el.addEventListener("blur", () => {
-        if (!el.value.trim()) el.setAttribute("aria-invalid", "true");
-        else el.removeAttribute("aria-invalid");
-      });
-      el.addEventListener("input", () => {
-        if (el.value.trim()) el.removeAttribute("aria-invalid");
-        if (!errorEl.hidden) { errorEl.hidden = true; errorEl.textContent = ""; }
-      });
+  ["whenLocal", "startAddress", "endAddress"].forEach((id) => {
+    const el = $(id);
+    el.addEventListener("blur", () => {
+      if (!el.value.trim()) el.setAttribute("aria-invalid", "true");
+      else el.removeAttribute("aria-invalid");
     });
+    el.addEventListener("input", () => {
+      if (el.value.trim()) el.removeAttribute("aria-invalid");
+      if (!errorEl.hidden) { errorEl.hidden = true; errorEl.textContent = ""; }
+    });
+  });
 
-    // Wire address autocompletes
-    attachPlaces("startAddress");
-    attachPlaces("endAddress");
+  attachPlaces("startAddress");
+  attachPlaces("endAddress");
 
-    form.addEventListener("submit", submit);
-    againBtn.addEventListener("click", resetForm);
-  }
+  form.addEventListener("submit", submit);
+  againBtn.addEventListener("click", resetForm);
 
+  // ---------- Helpers ----------
   function toLocalInput(d) {
     const pad = (n) => String(n).padStart(2, "0");
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -150,12 +60,22 @@
     whenHint.textContent = `I'll come by ${fmt.format(d)}.`;
   }
 
-  // ---------- Custom Places Autocomplete (server-proxied) ----------
   function debounce(fn, ms) {
     let t = null;
     return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
   }
 
+  function cryptoRandom() {
+    if (window.crypto?.randomUUID) return crypto.randomUUID();
+    return "s-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.hidden = false;
+  }
+
+  // ---------- Places Autocomplete (server-proxied) ----------
   function attachPlaces(inputId) {
     const input = $(inputId);
     const list = $(`${inputId}-suggestions`);
@@ -184,7 +104,6 @@
     const pick = async (i) => {
       const p = items[i];
       if (!p) return;
-      // Optimistic: show the main line instantly, refine with details
       input.value = p.description || p.main;
       items = [];
       activeIdx = -1;
@@ -192,13 +111,11 @@
       try {
         const qs = new URLSearchParams({ placeId: p.placeId });
         if (placesSession) qs.set("session", placesSession);
-        const r = await fetch(`/api/places/details?${qs}`, {
-          headers: withAuthHeaders(),
-        });
+        const r = await fetch(`/api/places/details?${qs}`);
         const j = await r.json();
         if (j.formattedAddress) input.value = j.formattedAddress;
-        placesSession = ""; // End the session on pick
-      } catch { /* keep optimistic value */ }
+        placesSession = "";
+      } catch { /* keep optimistic */ }
     };
 
     const query = debounce(async (q) => {
@@ -208,9 +125,7 @@
       try {
         if (!placesSession) placesSession = cryptoRandom();
         const qs = new URLSearchParams({ input: q, session: placesSession });
-        const r = await fetch(`/api/places/autocomplete?${qs}`, {
-          headers: withAuthHeaders(),
-        });
+        const r = await fetch(`/api/places/autocomplete?${qs}`);
         if (!r.ok) { items = []; render(); return; }
         const j = await r.json();
         items = j.predictions || [];
@@ -221,10 +136,7 @@
 
     input.addEventListener("input", () => query(input.value.trim()));
     input.addEventListener("focus", () => { if (items.length) render(); });
-    input.addEventListener("blur", () => {
-      // Delay so click on item still fires
-      setTimeout(() => { items = []; render(); }, 120);
-    });
+    input.addEventListener("blur", () => { setTimeout(() => { items = []; render(); }, 120); });
     input.addEventListener("keydown", (e) => {
       if (list.hidden || !items.length) return;
       if (e.key === "ArrowDown") { e.preventDefault(); activeIdx = (activeIdx + 1) % items.length; render(); }
@@ -232,20 +144,6 @@
       else if (e.key === "Enter") { e.preventDefault(); if (activeIdx >= 0) pick(activeIdx); else pick(0); }
       else if (e.key === "Escape") { items = []; render(); }
     });
-  }
-
-  function cryptoRandom() {
-    if (window.crypto?.randomUUID) return crypto.randomUUID();
-    return "s-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-  }
-
-  function withAuthHeaders() {
-    return familyCode ? { "x-family-code": familyCode } : {};
-  }
-
-  function showError(msg) {
-    errorEl.textContent = msg;
-    errorEl.hidden = false;
   }
 
   // ---------- Submit ----------
@@ -280,7 +178,7 @@
     try {
       const res = await fetch("/api/book", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...withAuthHeaders() },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           whenISO: whenDate.toISOString(),
           startAddress, endAddress, notes, passengerName,
@@ -288,13 +186,6 @@
       });
       const data = await res.json();
 
-      if (res.status === 401) {
-        // Code expired/invalidated
-        familyCode = "";
-        localStorage.removeItem(LS_KEY);
-        showError("Family code stopped working — refresh and re-enter.");
-        return;
-      }
       if (!res.ok || !data.ok) {
         showError(data.error || "Couldn't get that to Uncle. Try again in a second.");
         return;
@@ -329,13 +220,13 @@
     setTimeout(() => $("startAddress").focus(), 60);
   }
 
-  // ---------- Service worker ----------
+  // ---------- Cleanup: wipe any leftover gate state ----------
+  try { localStorage.removeItem("unclemiki.familyCode"); } catch {}
+
+  // ---------- Service worker (self-unregister if stale, then re-register) ----------
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     });
   }
-
-  // Kick it off
-  bootstrap();
 })();
