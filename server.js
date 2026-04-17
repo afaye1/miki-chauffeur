@@ -132,6 +132,26 @@ app.get("/api/places/details", rateLimit, familyGate, async (req, res) => {
   }
 });
 
+app.get("/api/places/reverse", rateLimit, familyGate, async (req, res) => {
+  if (!MAPS_KEY) return res.json({ formattedAddress: "" });
+  const lat = parseFloat(req.query.lat);
+  const lng = parseFloat(req.query.lng);
+  if (Number.isNaN(lat) || Number.isNaN(lng)) {
+    return res.status(400).json({ error: "lat & lng required" });
+  }
+  try {
+    const data = await placesFetch("/maps/api/geocode/json", {
+      latlng: `${lat},${lng}`,
+      result_type: "street_address|premise|subpremise|point_of_interest",
+    });
+    const first = (data.results || [])[0];
+    res.json({ formattedAddress: first?.formatted_address || "" });
+  } catch (err) {
+    console.error("[places/reverse]", err?.message || err);
+    res.status(502).json({ formattedAddress: "", error: "Reverse lookup failed." });
+  }
+});
+
 // ---------- Booking ----------
 app.post("/api/book", rateLimit, familyGate, async (req, res) => {
   const { whenISO, startAddress, endAddress, notes, passengerName } = req.body || {};

@@ -13,10 +13,10 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style"
+  href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet"
   href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="/styles.css">
@@ -33,83 +33,123 @@
       </div>
       <p class="eyebrow">Uncle duty</p>
       <h1 class="title">Uncle <em>Miki</em></h1>
-      <p class="tagline">Tell me when and where. I got you.</p>
+      <p class="tagline">Where to?</p>
     </header>
 
     <form id="booking" class="form" novalidate>
 
-      <div class="field">
-        <label for="passengerName">Who needs a ride?</label>
-        <input
-          id="passengerName"
-          name="passengerName"
-          type="text"
-          autocomplete="name"
-          placeholder="e.g. Nadia"
-          maxlength="80">
-        <p class="hint">So I know who I'm picking up.</p>
-      </div>
+      <!-- Pickup + drop-off linked block -->
+      <fieldset class="route" aria-label="Route">
+        <div class="route-dots" aria-hidden="true">
+          <span class="dot dot-from"></span>
+          <span class="route-line"></span>
+          <span class="dot dot-to"></span>
+        </div>
 
-      <div class="field">
-        <label for="whenLocal">When should I swing by?</label>
+        <div class="route-fields">
+          <div class="field field-ac field-row">
+            <label for="startAddress" class="sr-only">Pickup address</label>
+            <input
+              id="startAddress"
+              name="startAddress"
+              type="text"
+              inputmode="text"
+              autocomplete="off"
+              autocapitalize="off"
+              autocorrect="off"
+              spellcheck="false"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded="false"
+              aria-controls="startAddress-suggestions"
+              required
+              placeholder="Pickup"
+              maxlength="240">
+            <button type="button" class="icon-btn" id="useLocation"
+              aria-label="Use my current location">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+              </svg>
+            </button>
+            <ul id="startAddress-suggestions" class="ac-list" role="listbox" hidden></ul>
+          </div>
+
+          <button type="button" class="swap-btn" id="swapBtn" aria-label="Swap pickup and drop-off">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 4v14M7 18l-3-3M7 18l3-3"/>
+              <path d="M17 20V6M17 6l-3 3M17 6l3 3"/>
+            </svg>
+          </button>
+
+          <div class="field field-ac field-row">
+            <label for="endAddress" class="sr-only">Drop-off address</label>
+            <input
+              id="endAddress"
+              name="endAddress"
+              type="text"
+              inputmode="text"
+              autocomplete="off"
+              autocapitalize="off"
+              autocorrect="off"
+              spellcheck="false"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded="false"
+              aria-controls="endAddress-suggestions"
+              required
+              placeholder="Drop-off"
+              maxlength="240">
+            <ul id="endAddress-suggestions" class="ac-list" role="listbox" hidden></ul>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Recent addresses -->
+      <div class="chips chips-recent" id="recentChips" hidden aria-label="Recent addresses"></div>
+
+      <!-- Quick time chips -->
+      <div class="time-block">
+        <p class="block-label">When</p>
+        <div class="chips chips-time" id="timeChips" role="radiogroup" aria-label="When to come">
+          <button type="button" class="chip" data-offset="0"     role="radio" aria-checked="false">Now</button>
+          <button type="button" class="chip" data-offset="30"    role="radio" aria-checked="false">+30 min</button>
+          <button type="button" class="chip" data-offset="60"    role="radio" aria-checked="false">+1 hr</button>
+          <button type="button" class="chip" data-preset="tonight"  role="radio" aria-checked="false">Tonight</button>
+          <button type="button" class="chip" data-preset="tomorrow" role="radio" aria-checked="false">Tomorrow</button>
+          <button type="button" class="chip" data-preset="custom"   role="radio" aria-checked="false">Pick time</button>
+        </div>
         <input
           id="whenLocal"
           name="whenLocal"
           type="datetime-local"
-          required
-          autocomplete="off">
-        <p class="hint" id="whenHint">Pick a day and time.</p>
-      </div>
-
-      <div class="field field-ac">
-        <label for="startAddress">Where do I grab you?</label>
-        <input
-          id="startAddress"
-          name="startAddress"
-          type="text"
-          inputmode="text"
           autocomplete="off"
-          autocapitalize="off"
-          spellcheck="false"
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded="false"
-          aria-controls="startAddress-suggestions"
-          required
-          placeholder="Home, school, wherever"
-          maxlength="240">
-        <ul id="startAddress-suggestions" class="ac-list" role="listbox" hidden></ul>
+          hidden>
+        <p class="hint" id="whenHint" aria-live="polite"></p>
       </div>
 
-      <div class="field field-ac">
-        <label for="endAddress">Where we headed?</label>
-        <input
-          id="endAddress"
-          name="endAddress"
-          type="text"
-          inputmode="text"
-          autocomplete="off"
-          autocapitalize="off"
-          spellcheck="false"
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded="false"
-          aria-controls="endAddress-suggestions"
-          required
-          placeholder="Practice, airport, the mall…"
-          maxlength="240">
-        <ul id="endAddress-suggestions" class="ac-list" role="listbox" hidden></ul>
-      </div>
+      <!-- Extras: name + notes (progressive disclosure) -->
+      <details class="extras" id="extras">
+        <summary>
+          <span>Add a name / notes</span>
+          <svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="extras-body">
+          <div class="field">
+            <label for="passengerName">Who's riding</label>
+            <input id="passengerName" name="passengerName" type="text"
+              autocomplete="name" placeholder="e.g. Nadia" maxlength="80">
+          </div>
+          <div class="field">
+            <label for="notes">Anything I should know?</label>
+            <textarea id="notes" name="notes" rows="3" maxlength="600"
+              placeholder="Bags, stops, stops along the way…"></textarea>
+          </div>
+        </div>
+      </details>
 
-      <div class="field">
-        <label for="notes">Anything I should know? <span class="meta">(optional)</span></label>
-        <textarea
-          id="notes"
-          name="notes"
-          rows="3"
-          maxlength="600"
-          placeholder="Bags, stops, music on the way…"></textarea>
-      </div>
+      <!-- Live summary -->
+      <p class="summary" id="summary" aria-live="polite"></p>
 
       <button type="submit" class="cta" id="submitBtn">
         <span class="cta-label">Send it to Uncle Miki</span>
@@ -119,7 +159,7 @@
       <p class="fine" id="formError" role="alert" hidden></p>
     </form>
 
-    <section id="success" class="success" hidden>
+    <section id="success" class="success" role="status" aria-live="polite" hidden>
       <div class="success-badge" aria-hidden="true">
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
           <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2"/>
@@ -127,9 +167,12 @@
             stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
-      <h2 class="success-title">Got it. I'll be there.</h2>
+      <h2 class="success-title" tabindex="-1">Got it. I'll be there.</h2>
       <p class="success-sub" id="successSub"></p>
-      <button type="button" class="ghost" id="againBtn">Need another lift?</button>
+      <div class="success-actions">
+        <button type="button" class="ghost" id="copyBtn">Copy details</button>
+        <button type="button" class="ghost" id="againBtn">Book another</button>
+      </div>
     </section>
 
     <footer class="foot">
@@ -139,6 +182,9 @@
     </footer>
 
   </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="/app.js" defer></script>
 </body>
